@@ -1,0 +1,39 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  category: string;
+  slug: string;
+}
+
+const { title, description, pubDate, category, slug } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+const formattedDate = new Intl.DateTimeFormat('ja-JP', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+}).format(pubDate);
+---
+
+<article class="group">
+  <a href={`${base}posts/${slug}`} class="block">
+    <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#98D8C8] dark:hover:border-[#98D8C8] transition-colors">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs font-medium px-2 py-1 rounded-full bg-[#98D8C8] text-gray-900">
+          {category}
+        </span>
+        <span class="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</span>
+      </div>
+
+      <h3 class="text-xl font-bold mb-2 group-hover:text-[#FF6F61] transition-colors">
+        {title}
+      </h3>
+
+      <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2">
+        {description}
+      </p>
+    </div>
+  </a>
+</article>
