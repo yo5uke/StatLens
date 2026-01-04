@@ -5,22 +5,35 @@ interface Props {
   pubDate: Date;
   category: string;
   slug: string;
+  basePath?: string;
 }
 
-const { title, description, pubDate, category, slug } = Astro.props;
-const base = import.meta.env.BASE_URL;
+const { title, description, pubDate, category, slug, basePath = 'tips' } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 
 const formattedDate = new Intl.DateTimeFormat('ja-JP', {
   year: 'numeric',
   month: 'long',
   day: 'numeric'
 }).format(pubDate);
+
+// セクション名の表示用マッピング
+const sectionLabels: Record<string, string> = {
+  'tips': 'Tips',
+  'blog': 'Blog',
+  'projects': 'Projects'
+};
+
+const sectionLabel = sectionLabels[basePath] || basePath;
 ---
 
 <article class="group">
-  <a href={`${base}posts/${slug}`} class="block">
+  <a href={`${base}${basePath}/${slug}/`} class="block">
     <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#98D8C8] dark:hover:border-[#98D8C8] transition-colors">
-      <div class="flex items-center gap-2 mb-3">
+      <div class="flex items-center gap-2 mb-3 flex-wrap">
+        <span class="text-xs font-medium px-2 py-1 rounded-full bg-[#FF6F61]/20 dark:bg-[#FF6F61]/10 text-[#FF6F61] border border-[#FF6F61]/30">
+          {sectionLabel}
+        </span>
         <span class="text-xs font-medium px-2 py-1 rounded-full bg-[#98D8C8] text-gray-900">
           {category}
         </span>

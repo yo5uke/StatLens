@@ -6,7 +6,26 @@
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
       "Bash(tree:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(npm run quarto:build:*)",
+      "Bash(npm run quarto:render:python:*)",
+      "Bash(for f in typescript-intro-for-r-users.md astro-static-site-guide.md javascript-for-data-analysts.md)",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(__NEW_LINE__ grep \"^pubDate:\" \"$f\")",
+      "Bash(__NEW_LINE__ done)",
+      "Bash(npm run build:astro:*)",
+      "Bash(head:*)",
+      "Bash(rm:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run quarto:render:*)",
+      "Bash(npm run quarto:move:*)",
+      "Bash(npm run quarto:render:r:*)",
+      "Bash(quarto render:*)",
+      "Bash(npm run quarto:copy-images:*)",
+      "Bash(grep:*)"
     ]
   }
 }

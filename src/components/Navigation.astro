@@ -1,19 +1,21 @@
 ---
 const { pathname } = Astro.url;
-const base = import.meta.env.BASE_URL;
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 
 const navItems = [
-  { href: `${base}`, label: 'Home' },
-  { href: `${base}posts`, label: 'Posts' },
-  { href: `${base}about`, label: 'About' },
+  { href: base, label: 'Home' },
+  { href: `${base}about/`, label: 'About' },
+  { href: `${base}tips/`, label: 'Tips' },
+  { href: `${base}projects/`, label: 'Projects' },
+  { href: `${base}blog/`, label: 'Blog' },
 ];
 ---
 
-<nav class="border-b border-gray-200 dark:border-gray-700">
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-transform duration-300">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <a href={base} class="text-xl font-bold text-[#98D8C8] hover:text-[#FF6F61] transition-colors">
-        yo5uke-lab
+        StatLens
       </a>
 
       <div class="flex items-center gap-6">
@@ -48,27 +50,83 @@ const navItems = [
   </div>
 </nav>
 
-<script>
-  const themeToggle = document.getElementById('theme-toggle');
-  const darkIcon = document.getElementById('theme-toggle-dark-icon');
-  const lightIcon = document.getElementById('theme-toggle-light-icon');
+<script is:inline>
+  function initThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
 
-  const updateIcons = () => {
-    if (document.documentElement.classList.contains('dark')) {
-      darkIcon?.classList.remove('hidden');
-      lightIcon?.classList.add('hidden');
-    } else {
-      darkIcon?.classList.add('hidden');
-      lightIcon?.classList.remove('hidden');
-    }
-  };
+    if (!themeToggle || !darkIcon || !lightIcon) return;
 
-  updateIcons();
+    const updateIcons = () => {
+      if (document.documentElement.classList.contains('dark')) {
+        darkIcon.classList.remove('hidden');
+        lightIcon.classList.add('hidden');
+      } else {
+        darkIcon.classList.add('hidden');
+        lightIcon.classList.remove('hidden');
+      }
+    };
 
-  themeToggle?.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
     updateIcons();
-  });
+
+    themeToggle.onclick = () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateIcons();
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+  } else {
+    initThemeToggle();
+  }
+
+  document.addEventListener('astro:page-load', initThemeToggle);
+
+  // ナビゲーションバーのスクロール動作
+  function initNavbarScroll() {
+    const navbar = document.getElementById('navbar');
+    if (!navbar) return;
+
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    function updateNavbar() {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY <= 0) {
+        // 最上部では常に表示
+        navbar.style.transform = 'translateY(0)';
+      } else if (currentScrollY < lastScrollY) {
+        // 上方向スクロール: 表示
+        navbar.style.transform = 'translateY(0)';
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // 下方向スクロール（100px以上スクロールした場合）: 非表示
+        navbar.style.transform = 'translateY(-100%)';
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(updateNavbar);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavbarScroll);
+  } else {
+    initNavbarScroll();
+  }
+
+  document.addEventListener('astro:page-load', initNavbarScroll);
 </script>

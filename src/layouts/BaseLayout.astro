@@ -7,7 +7,8 @@ interface Props {
 }
 
 const { title, description = 'データサイエンス・統計分析の技術ブログ' } = Astro.props;
-const { base } = Astro.site ? { base: import.meta.env.BASE_URL } : { base: '/' };
+const baseUrl = import.meta.env.BASE_URL;
+const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 ---
 
 <!doctype html>
@@ -18,7 +19,7 @@ const { base } = Astro.site ? { base: import.meta.env.BASE_URL } : { base: '/' }
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <meta name="generator" content={Astro.generator} />
-    <title>{title} | yo5uke-lab</title>
+    <title>{title} | StatLens</title>
     <script is:inline>
       const theme = (() => {
         if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
@@ -37,7 +38,7 @@ const { base } = Astro.site ? { base: import.meta.env.BASE_URL } : { base: '/' }
       }
     </script>
   </head>
-  <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+  <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors pt-16">
     <slot />
   </body>
 </html>

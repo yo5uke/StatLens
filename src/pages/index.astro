@@ -5,51 +5,133 @@ import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import PostCard from '../components/PostCard.astro';
 
-const allPosts = await getCollection('posts');
-const publishedPosts = allPosts
+// 全コレクションから記事を取得
+const allTips = await getCollection('tips');
+const allBlog = await getCollection('blog');
+const allProjects = await getCollection('projects');
+
+// 各コレクションの記事にbasePathを追加
+const tipsWithBasePath = allTips.map(tip => ({
+  ...tip,
+  basePath: 'tips',
+  slug: tip.id.replace(/\.md$/, '')
+}));
+
+const blogWithBasePath = allBlog.map(post => ({
+  ...post,
+  basePath: 'blog',
+  slug: post.id.replace(/\.md$/, '')
+}));
+
+const projectsWithBasePath = allProjects.map(project => ({
+  ...project,
+  basePath: 'projects',
+  slug: project.id.replace(/\.md$/, '')
+}));
+
+// 全記事を結合してソート
+const allPosts = [...tipsWithBasePath, ...blogWithBasePath, ...projectsWithBasePath]
   .filter(post => !post.data.draft)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 5);
+
+const baseUrl = import.meta.env.BASE_URL;
+const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 ---
 
 <BaseLayout title="Home">
   <Navigation />
 
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <section class="mb-16">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">
-        Welcome to <span class="text-[#98D8C8]">yo5uke-lab</span>
-      </h1>
-      <p class="text-xl text-gray-600 dark:text-gray-300 mb-2">
-        データサイエンス・統計分析の技術ブログ
-      </p>
-      <p class="text-gray-600 dark:text-gray-400">
-        R、Python、TypeScript、統計手法などの技術Tipsやチュートリアルを発信しています。
-      </p>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-visible">
+    <!-- Hero Section -->
+    <section class="mb-20 relative overflow-visible">
+      <!-- Background decoration -->
+      <div class="absolute inset-0 -z-10 pointer-events-none" style="left: -200px; right: -200px; top: -200px; bottom: -200px;">
+        <!-- ティール系のぼかし（右上） -->
+        <div class="absolute -top-24 -right-24 w-[500px] h-[500px] bg-[#98D8C8]/20 dark:bg-[#7FB8AA]/20 rounded-full blur-3xl animate-float-1"></div>
+
+        <!-- オレンジ系のぼかし（左下） -->
+        <div class="absolute -bottom-24 -left-24 w-[600px] h-[600px] bg-[#FF6F61]/20 dark:bg-[#E6635C]/20 rounded-full blur-3xl animate-float-2"></div>
+
+        <!-- パープル系のぼかし（中央右寄り） - ダークモードで特に映える -->
+        <div class="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-[#98D8C8]/15 dark:bg-[#A78BFA]/15 rounded-full blur-3xl animate-float-3"></div>
+      </div>
+
+      <div class="pt-8 pb-12">
+        <!-- Main heading with gradient -->
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+          Welcome to<br/>
+          <span class="bg-gradient-to-r from-[#98D8C8] to-[#FF6F61] bg-clip-text text-transparent">
+            StatLens
+          </span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="text-2xl md:text-3xl text-gray-700 dark:text-gray-300 mb-6 font-medium">
+          データサイエンス・統計分析の技術ブログ
+        </p>
+
+        <!-- Description -->
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl leading-relaxed">
+          R、Python、TypeScript、統計手法などの技術Tipsやチュートリアルを発信しています。<br/>
+          データ分析の実践的な知識を共有し、学びの場を提供します。
+        </p>
+
+        <!-- Tech badges -->
+        <div class="flex flex-wrap gap-3 mb-8">
+          <span class="px-4 py-2 rounded-full bg-[#98D8C8]/20 dark:bg-[#98D8C8]/10 text-[#98D8C8] dark:text-[#98D8C8] font-medium text-sm border border-[#98D8C8]/30">
+            R
+          </span>
+          <span class="px-4 py-2 rounded-full bg-[#98D8C8]/20 dark:bg-[#98D8C8]/10 text-[#98D8C8] dark:text-[#98D8C8] font-medium text-sm border border-[#98D8C8]/30">
+            Python
+          </span>
+          <span class="px-4 py-2 rounded-full bg-[#98D8C8]/20 dark:bg-[#98D8C8]/10 text-[#98D8C8] dark:text-[#98D8C8] font-medium text-sm border border-[#98D8C8]/30">
+            TypeScript
+          </span>
+          <span class="px-4 py-2 rounded-full bg-[#98D8C8]/20 dark:bg-[#98D8C8]/10 text-[#98D8C8] dark:text-[#98D8C8] font-medium text-sm border border-[#98D8C8]/30">
+            Statistics
+          </span>
+          <span class="px-4 py-2 rounded-full bg-[#98D8C8]/20 dark:bg-[#98D8C8]/10 text-[#98D8C8] dark:text-[#98D8C8] font-medium text-sm border border-[#98D8C8]/30">
+            Machine Learning
+          </span>
+        </div>
+
+        <!-- CTA Button -->
+        <a
+          href={`${base}tips/`}
+          class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#98D8C8] to-[#98D8C8] hover:from-[#FF6F61] hover:to-[#FF6F61] text-gray-900 font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        >
+          Browse Articles
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+        </a>
+      </div>
     </section>
 
     <section>
-      <div class="flex items-center justify-between mb-8">
+      <div class="flex items-baseline justify-between mb-8">
         <h2 class="text-3xl font-bold">Latest Posts</h2>
-        <a
-          href={`${import.meta.env.BASE_URL}posts`}
-          class="text-[#98D8C8] hover:text-[#FF6F61] transition-colors font-medium"
-        >
-          View all →
-        </a>
       </div>
 
-      <div class="grid gap-6">
-        {publishedPosts.map((post) => (
-          <PostCard
-            title={post.data.title}
-            description={post.data.description}
-            pubDate={post.data.pubDate}
-            category={post.data.category}
-            slug={post.slug}
-          />
-        ))}
-      </div>
+      {allPosts.length > 0 ? (
+        <div class="grid gap-6">
+          {allPosts.map((post) => (
+            <PostCard
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              category={post.data.category}
+              slug={post.slug}
+              basePath={post.basePath}
+            />
+          ))}
+        </div>
+      ) : (
+        <p class="text-gray-600 dark:text-gray-400 text-center py-12">
+          まだ記事がありません。近日中に投稿予定です！
+        </p>
+      )}
     </section>
   </main>
 

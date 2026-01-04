@@ -1,1 +1,130 @@
 @import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+@variant dark (.dark &);
+
+@theme {
+  --color-primary: #98d8c8;
+  --color-accent: #ff6f61;
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+}
+
+/* コードブロック内のインラインコードの背景を透明に */
+.prose pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+}
+
+/* 出力ブロック内のインラインコードの背景も透明に */
+.prose .output-text code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+}
+
+/* コード実行出力結果のスタイル */
+.prose .output-text {
+  background-color: #f8f9fa;
+  border-left: 3px solid var(--color-primary);
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.dark .prose .output-text {
+  background-color: #1e293b;
+  border-left-color: var(--color-primary);
+}
+
+/* 出力結果内の改行を保持 */
+.prose .output-text pre {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Astroのシンタックスハイライトを出力ブロック内では無効化 */
+.prose .output-text pre.astro-code {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+.prose .output-text pre.astro-code code {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+.prose .output-text pre.astro-code span {
+  color: inherit !important;
+}
+
+/* 出力ブロック内の全ての要素の背景を透明に */
+.prose .output-text *:not(.output-text) {
+  background-color: transparent !important;
+}
+
+/* 背景ぼかしのふわふわアニメーション */
+@keyframes float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@keyframes float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 30px) scale(1.08);
+  }
+  66% {
+    transform: translate(25px, -25px) scale(0.92);
+  }
+}
+
+@keyframes float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(35px, 40px) scale(0.98);
+  }
+  66% {
+    transform: translate(-30px, -20px) scale(1.06);
+  }
+}
+
+@layer utilities {
+  .animate-float-1 {
+    animation: float-1 12s ease-in-out infinite;
+  }
+
+  .animate-float-2 {
+    animation: float-2 15s ease-in-out infinite;
+  }
+
+  .animate-float-3 {
+    animation: float-3 13s ease-in-out infinite;
+  }
+}

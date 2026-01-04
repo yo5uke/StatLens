@@ -1,0 +1,241 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import PostCard from '../../components/PostCard.astro';
+
+const allProjects = await getCollection('projects');
+const publishedProjects = allProjects
+  .filter(project => !project.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map(project => ({
+    ...blog,
+    slug: project.id.replace(/^src\/content\/blog\//, '').replace(/\.md$/, '')
+  }));
+
+const categories = [...new Set(publishedProjects.map(project => project.data.category))];
+
+// Group blogs by year and month
+const projectsByYearMonth = publishedProjects.reduce((acc, blog) => {
+  const year = project.data.pubDate.getFullYear();
+  const month = project.data.pubDate.getMonth() + 1; // 1-indexed month
+
+  if (!acc[year]) {
+    acc[year] = {};
+  }
+  if (!acc[year][month]) {
+    acc[year][month] = [];
+  }
+  acc[year][month].push(blog);
+
+  return acc;
+}, {} as Record<number, Record<number, typeof publishedProjects>>);
+
+const years = Object.keys(projectsByYearMonth).map(Number).sort((a, b) => b - a);
+
+const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+---
+
+<BaseLayout title="All Projects Posts">
+  <Navigation />
+
+  <main class="px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-7xl mx-auto">
+      <section class="mb-12 lg:ml-[20%]">
+        <h1 class="text-4xl font-bold mb-4">Projects</h1>
+        <p class="text-gray-600 dark:text-gray-400">
+          プロジェクトの一覧です。カテゴリや投稿月でフィルタリングできます。
+        </p>
+      </section>
+
+      <div class="flex flex-col lg:grid lg:grid-cols-5 gap-8 lg:gap-8">
+        <!-- Left spacer -->
+        <div class="hidden lg:block"></div>
+
+        <!-- Main content area (3 columns) -->
+        <div class="lg:col-span-3 min-w-0">
+        <div class="mb-8">
+          <div class="flex flex-wrap gap-2" id="category-filters">
+            <button
+              class="category-filter px-4 py-2 rounded-full text-sm font-medium transition-colors bg-[#98D8C8] text-gray-900"
+              data-category="all"
+            >
+              All
+            </button>
+            {categories.map(category => (
+              <button
+                class="category-filter px-4 py-2 rounded-full text-sm font-medium transition-colors bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-[#98D8C8] hover:text-gray-900"
+                data-category={category}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div class="grid gap-6" id="blogs-container">
+          {publishedProjects.map((blog) => {
+            const year = project.data.pubDate.getFullYear();
+            const month = project.data.pubDate.getMonth() + 1;
+            return (
+              <div class="blog-item" data-category={project.data.category} data-year={year} data-month={month}>
+                <PostCard
+                  title={project.data.title}
+                  description={project.data.description}
+                  pubDate={project.data.pubDate}
+                  category={project.data.category}
+                  slug={project.slug}
+                  basePath="projects"
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <!-- Year/Month sidebar (1 column) -->
+      <aside class="lg:col-span-1">
+        <div class="lg:sticky lg:top-8">
+          <h2 class="text-lg font-bold mb-4">アーカイブ</h2>
+          <div class="space-y-2">
+            {years.map(year => {
+              const monthsInYear = Object.keys(projectsByYearMonth[year]).map(Number).sort((a, b) => b - a);
+              const totalProjectssInYear = monthsInYear.reduce((sum, month) => sum + projectsByYearMonth[year][month].length, 0);
+
+              return (
+                <div class="year-section">
+                  <button
+                    class="year-toggle w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+                    data-year={year}
+                  >
+                    <span class="font-medium text-gray-900 dark:text-gray-100">
+                      {year}
+                    </span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">
+                        ({totalProjectssInYear})
+                      </span>
+                      <svg class="chevron w-4 h-4 transition-transform text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                  </button>
+                  <div class="month-list hidden pl-4 mt-1 space-y-1">
+                    {monthsInYear.map(month => {
+                      const blogsCount = projectsByYearMonth[year][month].length;
+                      return (
+                        <button
+                          class="month-filter w-full flex items-center justify-between px-3 py-1.5 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left text-gray-700 dark:text-gray-300"
+                          data-year={year}
+                          data-month={month}
+                        >
+                          <span>{monthNames[month - 1]}</span>
+                          <span class="text-xs text-gray-500 dark:text-gray-400">
+                            ({blogsCount})
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+    </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  const categoryFilterButtons = document.querySelectorAll('.category-filter');
+  const monthFilterButtons = document.querySelectorAll('.month-filter');
+  const yearToggleButtons = document.querySelectorAll('.year-toggle');
+  const blogItems = document.querySelectorAll('.blog-item');
+
+  let activeCategory = 'all';
+  let activeYear: number | null = null;
+  let activeMonth: number | null = null;
+
+  function applyFilters() {
+    blogItems.forEach(item => {
+      const htmlItem = item as HTMLElement;
+      const category = htmlItem.getAttribute('data-category');
+      const year = parseInt(htmlItem.getAttribute('data-year') || '0');
+      const month = parseInt(htmlItem.getAttribute('data-month') || '0');
+
+      const categoryMatch = activeCategory === 'all' || category === activeCategory;
+      const yearMatch = activeYear === null || year === activeYear;
+      const monthMatch = activeMonth === null || month === activeMonth;
+
+      if (categoryMatch && yearMatch && monthMatch) {
+        htmlItem.style.display = 'block';
+      } else {
+        htmlItem.style.display = 'none';
+      }
+    });
+  }
+
+  // Category filter handlers
+  categoryFilterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      activeCategory = button.getAttribute('data-category') || 'all';
+
+      categoryFilterButtons.forEach(btn => {
+        btn.classList.remove('bg-[#98D8C8]', 'text-gray-900');
+        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+      });
+
+      button.classList.add('bg-[#98D8C8]', 'text-gray-900');
+      button.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+
+      applyFilters();
+    });
+  });
+
+  // Year toggle handlers (collapsible)
+  yearToggleButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const yearSection = button.closest('.year-section');
+      const monthList = yearSection?.querySelector('.month-list');
+      const chevron = button.querySelector('.chevron');
+
+      if (monthList && chevron) {
+        monthList.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
+      }
+    });
+  });
+
+  // Month filter handlers
+  monthFilterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const year = parseInt(button.getAttribute('data-year') || '0');
+      const month = parseInt(button.getAttribute('data-month') || '0');
+
+      // Toggle selection
+      if (activeYear === year && activeMonth === month) {
+        activeYear = null;
+        activeMonth = null;
+      } else {
+        activeYear = year;
+        activeMonth = month;
+      }
+
+      // Update button styles
+      monthFilterButtons.forEach(btn => {
+        btn.classList.remove('bg-[#98D8C8]/20', 'text-[#98D8C8]', 'font-medium');
+      });
+
+      if (activeYear !== null && activeMonth !== null) {
+        button.classList.add('bg-[#98D8C8]/20', 'text-[#98D8C8]', 'font-medium');
+      }
+
+      applyFilters();
+    });
+  });
+</script>
