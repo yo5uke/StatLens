@@ -1,10 +1,20 @@
-# yo5uke-lab
+# StatLens
 
-データサイエンス・統計分析の技術ブログサイト。R、Python、TypeScript、統計手法などの技術Tipsやチュートリアルを発信しています。
+**StatLens** は、統計学とデータ分析に関する知見を共有する技術ブログサイトです。
 
-## プロジェクト概要
+🌐 **サイトURL**: [https://yo5uke.com/StatLens](https://yo5uke.com/StatLens)
 
-このサイトは、統計分析やデータサイエンスに関する技術的な知見を整理・共有するために構築されました。モダンなWebテクノロジー（Astro、TypeScript、Tailwind CSS）を活用した静的サイトジェネレーターで、GitHub Pagesにホスティングされています。
+## サイト紹介
+
+StatLensは、データサイエンスと統計分析に携わる人々に向けた技術情報プラットフォームです。R、Python、TypeScriptなどのプログラミング言語を用いた実践的なTipsや、統計手法の理論と実装、データ分析プロジェクトの紹介を通じて、学びと発見を提供します。
+
+### コンテンツカテゴリ
+
+- **📝 Blog**: 技術記事、チュートリアル、分析手法の解説
+- **🔬 Projects**: データ分析プロジェクトやツール開発の紹介
+- **💡 Tips**: 実務で役立つ Tips やコードスニペット
+
+モダンなWebテクノロジー（Astro、TypeScript、Tailwind CSS）で構築され、GitHub Pagesでホスティングされています。
 
 ## 技術スタック
 
@@ -19,7 +29,7 @@
 ## 機能
 
 - 📝 Markdownで記事を管理（シンタックスハイライト対応）
-- 🏷️ カテゴリフィルタリング機能
+- 🏷️ Blog、Projects、Tipsの3つのコンテンツセクション
 - 🌙 ダークモード対応
 - 📱 レスポンシブデザイン
 - ⚡ 高速な静的サイト生成
@@ -37,8 +47,8 @@
 リポジトリをクローンして、依存関係をインストールします。
 
 ```bash
-git clone https://github.com/yo5uke/yo5uke-lab.git
-cd yo5uke-lab
+git clone https://github.com/yo5uke/StatLens.git
+cd StatLens
 npm install
 ```
 
@@ -80,7 +90,7 @@ npm run format   # Prettierでコード整形
 ## プロジェクト構造
 
 ```
-yo5uke-lab/
+StatLens/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml          # GitHub Actionsデプロイ設定
@@ -91,13 +101,31 @@ yo5uke-lab/
 │   │   └── PostCard.astro      # 記事カード
 │   ├── content/
 │   │   ├── config.ts           # コンテンツコレクション設定
-│   │   └── posts/              # ブログ記事（Markdown）
-│   │       ├── post-1.md
-│   │       └── post-2.md
+│   │   ├── blog/               # ブログ記事（Markdown）
+│   │   ├── projects/           # プロジェクト（Markdown）
+│   │   └── tips/               # Tips（Markdown）
 │   ├── layouts/
 │   │   └── BaseLayout.astro    # ベースレイアウト
 │   ├── pages/
 │   │   ├── index.astro         # トップページ
+│   │   ├── about.astro         # Aboutページ
+│   │   ├── blog/
+│   │   │   ├── index.astro     # ブログ一覧ページ
+│   │   │   └── [...slug].astro # ブログ詳細ページ
+│   │   ├── projects/
+│   │   │   ├── index.astro     # プロジェクト一覧ページ
+│   │   │   └── [...slug].astro # プロジェクト詳細ページ
+│   │   └── tips/
+│   │       ├── index.astro     # Tips一覧ページ
+│   │       └── [...slug].astro # Tips詳細ページ
+│   ├── styles/
+│   │   └── global.css          # グローバルスタイル
+│   └── types.ts                # TypeScript型定義
+├── public/                     # 静的ファイル（画像など）
+├── astro.config.mjs            # Astro設定ファイル
+├── tsconfig.json               # TypeScript設定
+└── package.json
+```
 │   │   ├── about.astro         # Aboutページ
 │   │   └── posts/
 │   │       ├── index.astro     # 記事一覧ページ
@@ -113,19 +141,19 @@ yo5uke-lab/
 └── package.json
 ```
 
-## 新規記事の追加方法
+## 新規コンテンツの追加方法
 
 ### 1. Markdownファイルを作成
 
-`src/content/posts/` ディレクトリに新しい `.md` ファイルを作成します。
+コンテンツタイプに応じて、適切なディレクトリに `.md` ファイルを作成します。
 
-```bash
-src/content/posts/my-new-post.md
-```
+- ブログ記事: `src/content/blog/2026/01/your-post.md`
+- プロジェクト: `src/content/projects/your-project.md`
+- Tips: `src/content/tips/2026/01/your-tip.md`
 
 ### 2. フロントマターを記述
 
-記事の先頭にYAML形式のメタデータを追加します。
+ファイルの先頭にYAML形式のメタデータを追加します。
 
 ```yaml
 ---
@@ -148,9 +176,9 @@ console.log(greeting);
 \`\`\`
 ```
 
-### 3. 記事の確認
+### 3. コンテンツの確認
 
-開発サーバーを起動して、記事が正しく表示されるか確認します。
+開発サーバーを起動して、コンテンツが正しく表示されるか確認します。
 
 ```bash
 npm run dev
@@ -209,21 +237,21 @@ npm run build
 
 ```javascript
 export default defineConfig({
-  site: 'https://your-username.github.io',
-  base: '/your-repo-name',
+  site: 'https://yo5uke.com',
+  base: '/StatLens',
   // ...
 });
 ```
 
 ### カラーテーマの変更
 
-プライマリカラー（ミントグリーン）とアクセントカラー（コーラルピンク）は、以下のファイルで定義されています。
+プライマリカラーとアクセントカラーは、以下のファイルで定義されています。
 
 - [src/components/Navigation.astro](src/components/Navigation.astro)
 - [src/components/PostCard.astro](src/components/PostCard.astro)
 - [src/pages/index.astro](src/pages/index.astro)
 
-Tailwind CSSのカスタムカラー `text-[#98D8C8]` や `text-[#FF6F61]` を変更することで、テーマカラーをカスタマイズできます。
+Tailwind CSSのカスタムカラーを変更することで、テーマカラーをカスタマイズできます。
 
 ## トラブルシューティング
 
@@ -235,7 +263,7 @@ npm run build
 
 で型エラーやビルドエラーが発生する場合は、以下を確認してください。
 
-- 記事のフロントマターが正しく記述されているか
+- コンテンツのフロントマターが正しく記述されているか
 - `pubDate` が日付形式（YYYY-MM-DD）になっているか
 - TypeScriptの型エラーがないか
 
@@ -246,10 +274,11 @@ npm run build
 
 ## ライセンス
 
-MIT License
+Creative Commons Attribution 4.0 International (CC BY 4.0)
 
 ## 作成者
 
-yo5uke - データサイエンス・統計分析の技術ブログ
+yo5uke
 
 - GitHub: [@yo5uke](https://github.com/yo5uke)
+- Website: [https://yo5uke.com](https://yo5uke.com)
