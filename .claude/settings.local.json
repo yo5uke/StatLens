@@ -25,7 +25,9 @@
       "Bash(npm run quarto:render:r:*)",
       "Bash(quarto render:*)",
       "Bash(npm run quarto:copy-images:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)"
     ]
   }
 }

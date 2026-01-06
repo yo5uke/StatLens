@@ -4,20 +4,38 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
 import PostCard from '../../components/PostCard.astro';
+import { standaloneProjects } from '../../data/standalone-projects';
 
 const allProjects = await getCollection('projects');
-const publishedProjects = allProjects
+const mdProjects = allProjects
   .filter(project => !project.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .map(project => ({
-    ...blog,
-    slug: project.id.replace(/^src\/content\/blog\//, '').replace(/\.md$/, '')
+    ...project,
+    slug: project.id.replace(/^src\/content\/projects\//, '').replace(/\.md$/, '')
   }));
+
+// 独立したプロジェクト（Astroページ）を追加
+const standaloneProjectsWithData = standaloneProjects
+  .filter(project => !project.draft)
+  .map(project => ({
+    data: {
+      title: project.title,
+      description: project.description,
+      pubDate: project.pubDate,
+      category: project.category,
+      tags: project.tags,
+      draft: project.draft
+    },
+    slug: project.slug
+  }));
+
+const publishedProjects = [...mdProjects, ...standaloneProjectsWithData]
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const categories = [...new Set(publishedProjects.map(project => project.data.category))];
 
-// Group blogs by year and month
-const projectsByYearMonth = publishedProjects.reduce((acc, blog) => {
+// Group projects by year and month
+const projectsByYearMonth = publishedProjects.reduce((acc, project) => {
   const year = project.data.pubDate.getFullYear();
   const month = project.data.pubDate.getMonth() + 1; // 1-indexed month
 
@@ -27,7 +45,7 @@ const projectsByYearMonth = publishedProjects.reduce((acc, blog) => {
   if (!acc[year][month]) {
     acc[year][month] = [];
   }
-  acc[year][month].push(blog);
+  acc[year][month].push(project);
 
   return acc;
 }, {} as Record<number, Record<number, typeof publishedProjects>>);
@@ -74,12 +92,12 @@ const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8�
           </div>
         </div>
 
-        <div class="grid gap-6" id="blogs-container">
-          {publishedProjects.map((blog) => {
+        <div class="grid gap-6" id="projects-container">
+          {publishedProjects.map((project) => {
             const year = project.data.pubDate.getFullYear();
             const month = project.data.pubDate.getMonth() + 1;
             return (
-              <div class="blog-item" data-category={project.data.category} data-year={year} data-month={month}>
+              <div class="project-item" data-category={project.data.category} data-year={year} data-month={month}>
                 <PostCard
                   title={project.data.title}
                   description={project.data.description}
@@ -101,7 +119,7 @@ const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8�
           <div class="space-y-2">
             {years.map(year => {
               const monthsInYear = Object.keys(projectsByYearMonth[year]).map(Number).sort((a, b) => b - a);
-              const totalProjectssInYear = monthsInYear.reduce((sum, month) => sum + projectsByYearMonth[year][month].length, 0);
+              const totalProjectsInYear = monthsInYear.reduce((sum, month) => sum + projectsByYearMonth[year][month].length, 0);
 
               return (
                 <div class="year-section">
@@ -114,7 +132,7 @@ const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8�
                     </span>
                     <div class="flex items-center gap-2">
                       <span class="text-xs text-gray-500 dark:text-gray-400">
-                        ({totalProjectssInYear})
+                        ({totalProjectsInYear})
                       </span>
                       <svg class="chevron w-4 h-4 transition-transform text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -123,7 +141,7 @@ const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8�
                   </button>
                   <div class="month-list hidden pl-4 mt-1 space-y-1">
                     {monthsInYear.map(month => {
-                      const blogsCount = projectsByYearMonth[year][month].length;
+                      const projectsCount = projectsByYearMonth[year][month].length;
                       return (
                         <button
                           class="month-filter w-full flex items-center justify-between px-3 py-1.5 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left text-gray-700 dark:text-gray-300"
@@ -132,7 +150,7 @@ const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8�
                         >
                           <span>{monthNames[month - 1]}</span>
                           <span class="text-xs text-gray-500 dark:text-gray-400">
-                            ({blogsCount})
+                            ({projectsCount})
                           </span>
                         </button>
                       );
@@ -155,14 +173,14 @@ const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8�
   const categoryFilterButtons = document.querySelectorAll('.category-filter');
   const monthFilterButtons = document.querySelectorAll('.month-filter');
   const yearToggleButtons = document.querySelectorAll('.year-toggle');
-  const blogItems = document.querySelectorAll('.blog-item');
+  const projectItems = document.querySelectorAll('.project-item');
 
   let activeCategory = 'all';
   let activeYear: number | null = null;
   let activeMonth: number | null = null;
 
   function applyFilters() {
-    blogItems.forEach(item => {
+    projectItems.forEach(item => {
       const htmlItem = item as HTMLElement;
       const category = htmlItem.getAttribute('data-category');
       const year = parseInt(htmlItem.getAttribute('data-year') || '0');

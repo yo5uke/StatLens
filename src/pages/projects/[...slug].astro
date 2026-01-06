@@ -6,15 +6,15 @@ import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
 
 export async function getStaticPaths() {
-  const blogs = await getCollection('projects');
-  return blogs.map((blog) => {
+  const projects = await getCollection('projects');
+  return projects.map((project) => {
     const cleanSlug = project.id
-      .replace(/^src\/content\/blog\//, '')
+      .replace(/^src\/content\/projects\//, '')
       .replace(/\.md$/, '');
 
     return {
       params: { slug: cleanSlug },
-      props: blog,
+      props: project,
     };
   });
 }

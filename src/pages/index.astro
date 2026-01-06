@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import PostCard from '../components/PostCard.astro';
+import { standaloneProjects } from '../data/standalone-projects';
 
 // 全コレクションから記事を取得
 const allTips = await getCollection('tips');
@@ -29,8 +30,22 @@ const projectsWithBasePath = allProjects.map(project => ({
   slug: project.id.replace(/\.md$/, '')
 }));
 
+// 独立したプロジェクト（Astroページ）を追加
+const standaloneProjectsWithData = standaloneProjects.map(project => ({
+  data: {
+    title: project.title,
+    description: project.description,
+    pubDate: project.pubDate,
+    category: project.category,
+    tags: project.tags,
+    draft: project.draft
+  },
+  basePath: project.basePath,
+  slug: project.slug
+}));
+
 // 全記事を結合してソート
-const allPosts = [...tipsWithBasePath, ...blogWithBasePath, ...projectsWithBasePath]
+const allPosts = [...tipsWithBasePath, ...blogWithBasePath, ...projectsWithBasePath, ...standaloneProjectsWithData]
   .filter(post => !post.data.draft)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 5);
@@ -51,7 +66,7 @@ const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
         <div class="absolute -top-24 -right-24 w-[500px] h-[500px] bg-[#98D8C8]/20 dark:bg-[#7FB8AA]/20 rounded-full blur-3xl animate-float-1"></div>
 
         <!-- オレンジ系のぼかし（左下） -->
-        <div class="absolute -bottom-24 -left-24 w-[600px] h-[600px] bg-[#FF6F61]/20 dark:bg-[#E6635C]/20 rounded-full blur-3xl animate-float-2"></div>
+        <div class="absolute -bottom-24 -left-24 w-[600px] h-[600px] bg-[#FF6F61]/12 dark:bg-[#E6635C]/20 rounded-full blur-3xl animate-float-2"></div>
 
         <!-- パープル系のぼかし（中央右寄り） - ダークモードで特に映える -->
         <div class="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-[#98D8C8]/15 dark:bg-[#A78BFA]/15 rounded-full blur-3xl animate-float-3"></div>

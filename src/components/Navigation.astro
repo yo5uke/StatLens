@@ -11,11 +11,13 @@ const navItems = [
 ];
 ---
 
-<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-transform duration-300">
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 transition-transform duration-300 shadow-sm">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
-      <a href={base} class="text-xl font-bold text-[#98D8C8] hover:text-[#FF6F61] transition-colors">
-        StatLens
+      <a href={base} class="relative text-2xl font-normal tracking-wide group" style="font-family: 'Poppins', sans-serif; letter-spacing: 0.02em;">
+        <span class="bg-gradient-to-r from-[#98D8C8] via-[#98D8C8] to-[#FF6F61] bg-clip-text text-transparent bg-[length:200%_100%] bg-[position:0%_0%] transition-all duration-500 group-hover:bg-[position:100%_0%] drop-shadow-sm">
+          StatLens
+        </span>
       </a>
 
       <div class="flex items-center gap-6">
@@ -34,8 +36,18 @@ const navItems = [
         ))}
 
         <button
+          id="search-toggle"
+          class="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 backdrop-blur-sm transition-all duration-200"
+          aria-label="検索"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+
+        <button
           id="theme-toggle"
-          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          class="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 backdrop-blur-sm transition-all duration-200"
           aria-label="Toggle theme"
         >
           <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
@@ -49,6 +61,49 @@ const navItems = [
     </div>
   </div>
 </nav>
+
+<!-- 検索モーダル -->
+<div id="search-modal" class="fixed inset-0 z-50 hidden">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-md" id="search-backdrop"></div>
+
+  <!-- Modal Content -->
+  <div class="relative min-h-screen flex items-start justify-center p-4 pt-20">
+    <div class="relative w-full max-w-2xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
+      <!-- Search Input -->
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input
+            type="text"
+            id="pagefind-search-input"
+            placeholder="記事を検索..."
+            class="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 text-lg"
+            autofocus
+          />
+          <button
+            id="search-close"
+            class="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 backdrop-blur-sm transition-all duration-200"
+            aria-label="閉じる"
+          >
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Results -->
+      <div id="pagefind-search-results" class="max-h-[60vh] overflow-y-auto p-4">
+        <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+          キーワードを入力して検索してください
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script is:inline>
   function initThemeToggle() {
@@ -129,4 +184,120 @@ const navItems = [
   }
 
   document.addEventListener('astro:page-load', initNavbarScroll);
+
+  // 検索機能の初期化
+  function initSearch() {
+    const searchToggle = document.getElementById('search-toggle');
+    const searchModal = document.getElementById('search-modal');
+    const searchBackdrop = document.getElementById('search-backdrop');
+    const searchClose = document.getElementById('search-close');
+    const searchInput = document.getElementById('pagefind-search-input');
+    const searchResults = document.getElementById('pagefind-search-results');
+
+    if (!searchToggle || !searchModal || !searchInput || !searchResults) return;
+
+    let pagefind = null;
+
+    // 検索モーダルを開く
+    function openSearch() {
+      searchModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => searchInput.focus(), 100);
+
+      // Pagefindを動的にロード（ビルド後のみ利用可能）
+      if (!pagefind && typeof window !== 'undefined') {
+        import('/StatLens/pagefind/pagefind.js')
+          .then(module => {
+            pagefind = module;
+            console.log('Pagefind loaded successfully');
+          })
+          .catch(err => {
+            console.warn('Pagefind not available (probably in dev mode):', err);
+            searchResults.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">検索機能は本番ビルド後に利用可能です</div>';
+          });
+      }
+    }
+
+    // 検索モーダルを閉じる
+    function closeSearch() {
+      searchModal.classList.add('hidden');
+      document.body.style.overflow = '';
+      searchInput.value = '';
+      searchResults.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">キーワードを入力して検索してください</div>';
+    }
+
+    // 検索実行
+    async function performSearch(query) {
+      if (!pagefind || !query.trim()) {
+        searchResults.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">キーワードを入力して検索してください</div>';
+        return;
+      }
+
+      searchResults.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">検索中...</div>';
+
+      try {
+        const search = await pagefind.search(query);
+        
+        if (search.results.length === 0) {
+          searchResults.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">結果が見つかりませんでした</div>';
+          return;
+        }
+
+        const resultsHTML = await Promise.all(
+          search.results.slice(0, 10).map(async (result) => {
+            const data = await result.data();
+            return `
+              <a href="${data.url}" class="block p-4 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 backdrop-blur-sm transition-all duration-200 border-b border-gray-100/50 dark:border-gray-800/50 last:border-b-0">
+                <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">${data.meta.title || 'Untitled'}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">${data.excerpt || data.meta.description || ''}</p>
+                <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                  ${data.meta.category ? `<span class="px-2 py-0.5 rounded bg-[#98D8C8]/20 text-[#98D8C8]">${data.meta.category}</span>` : ''}
+                  <span>${data.url}</span>
+                </div>
+              </a>
+            `;
+          })
+        );
+
+        searchResults.innerHTML = resultsHTML.join('');
+      } catch (err) {
+        console.error('Search error:', err);
+        searchResults.innerHTML = '<div class="text-center text-red-500 py-12">検索中にエラーが発生しました</div>';
+      }
+    }
+
+    // イベントリスナー
+    searchToggle.addEventListener('click', openSearch);
+    searchClose.addEventListener('click', closeSearch);
+    searchBackdrop.addEventListener('click', closeSearch);
+
+    // Escキーで閉じる
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !searchModal.classList.contains('hidden')) {
+        closeSearch();
+      }
+      // Cmd/Ctrl + K で検索を開く
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openSearch();
+      }
+    });
+
+    // 検索入力のデバウンス処理
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        performSearch(e.target.value);
+      }, 300);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSearch);
+  } else {
+    initSearch();
+  }
+
+  document.addEventListener('astro:page-load', initSearch);
 </script>

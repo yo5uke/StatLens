@@ -1,0 +1,808 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Navigation from '../../../components/Navigation.astro';
+import Footer from '../../../components/Footer.astro';
+
+const title = "サンプルサイズ計算機";
+const description = "統計的検定に必要なサンプルサイズをインタラクティブに計算できるツールです。効果量、有意水準、検出力を調整して、必要なサンプルサイズをリアルタイムで確認できます。";
+---
+
+<BaseLayout title={title} description={description}>
+  <Navigation />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- ヘッダーセクション -->
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-400">
+        {description}
+      </p>
+    </header>
+
+    <!-- タブナビゲーション -->
+    <div class="mb-8">
+      <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex space-x-8" role="tablist">
+          <button
+            id="tab-ttest"
+            class="tab-button active border-b-2 border-[#98D8C8] text-[#98D8C8] py-4 px-1 text-sm font-medium"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-ttest"
+          >
+            独立2群t検定
+          </button>
+          <button
+            id="tab-paired"
+            class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 py-4 px-1 text-sm font-medium"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-paired"
+          >
+            対応のあるt検定
+          </button>
+          <button
+            id="tab-proportion"
+            class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 py-4 px-1 text-sm font-medium"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-proportion"
+          >
+            比率の検定
+          </button>
+          <button
+            id="tab-correlation"
+            class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 py-4 px-1 text-sm font-medium"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-correlation"
+          >
+            相関係数の検定
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- パネルコンテンツ -->
+    <div id="panel-ttest" class="tab-panel" role="tabpanel">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- 左側: パラメータ設定 -->
+        <div class="space-y-6">
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-2xl font-bold mb-6">パラメータ設定</h2>
+
+            <!-- 効果量 -->
+            <div class="mb-6">
+              <label class="flex items-center justify-between text-sm font-medium mb-2">
+                <span class="flex items-center">
+                  効果量 (Cohen's d)
+                  <span class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <span class="tooltip-text">2つのグループ間の差の大きさを標準化した指標。値が大きいほど差が大きいことを示します。小(0.2)、中(0.5)、大(0.8)が目安です。</span>
+                  </span>
+                </span>
+                <span id="effect-size-value" class="text-2xl font-bold text-[#98D8C8]">0.50</span>
+              </label>
+              <input
+                type="range"
+                id="effect-size"
+                min="0.1"
+                max="0.8"
+                step="0.05"
+                value="0.5"
+                class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#98D8C8]"
+                aria-label="効果量"
+              />
+              <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                <span>小</span>
+                <span>中</span>
+                <span>大</span>
+              </div>
+            </div>
+
+            <!-- 有意水準 -->
+            <div class="mb-6">
+              <label class="text-sm font-medium mb-3 flex items-center">
+                有意水準 (α)
+                <span class="tooltip-container">
+                  <span class="tooltip-icon">i</span>
+                  <span class="tooltip-text">第1種の過誤（実際には差がないのに「差がある」と判断する誤り）を犯す確率。一般的に0.05が使用されます。</span>
+                </span>
+              </label>
+              <div class="flex gap-3">
+                <button class="alpha-button px-4 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#98D8C8] hover:text-[#98D8C8]" data-value="0.01">0.01</button>
+                <button class="alpha-button px-4 py-2 rounded-lg border-2 border-[#98D8C8] bg-[#98D8C8]/10 text-[#98D8C8] font-semibold" data-value="0.05">0.05</button>
+                <button class="alpha-button px-4 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#98D8C8] hover:text-[#98D8C8]" data-value="0.10">0.10</button>
+              </div>
+            </div>
+
+            <!-- 検出力 -->
+            <div class="mb-6">
+              <label class="flex items-center justify-between text-sm font-medium mb-2">
+                <span class="flex items-center">
+                  検出力 (1-β)
+                  <span class="tooltip-container">
+                    <span class="tooltip-icon">i</span>
+                    <span class="tooltip-text">実際に効果が存在するときに、それを正しく検出できる確率。一般的に0.80以上が推奨されます。</span>
+                  </span>
+                </span>
+                <span id="power-value" class="text-2xl font-bold text-[#98D8C8]">0.80</span>
+              </label>
+              <input
+                type="range"
+                id="power"
+                min="0.70"
+                max="0.99"
+                step="0.01"
+                value="0.80"
+                class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#98D8C8]"
+                aria-label="検出力"
+              />
+              <div class="flex justify-between mt-2 text-xs text-gray-500">
+                <span>0.70</span>
+                <span>0.80</span>
+                <span>0.90</span>
+                <span>0.99</span>
+              </div>
+            </div>
+
+            <!-- 片側/両側 -->
+            <div class="mb-6">
+              <label class="text-sm font-medium mb-3 block">検定の種類</label>
+              <div class="flex gap-4">
+                <label class="flex items-center cursor-pointer">
+                  <input type="radio" name="test-type" value="two-sided" checked class="mr-2 accent-[#98D8C8]" />
+                  <span>両側検定</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                  <input type="radio" name="test-type" value="one-sided" class="mr-2 accent-[#98D8C8]" />
+                  <span>片側検定</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 計算結果 -->
+          <div class="relative bg-gradient-to-br from-[#98D8C8]/10 to-[#FF6F61]/10 dark:from-[#98D8C8]/20 dark:to-[#FF6F61]/20 rounded-lg border-2 border-[#98D8C8] p-6 backdrop-blur-md bg-white/30 dark:bg-gray-800/30">
+            <h2 class="text-2xl font-bold mb-4">計算結果</h2>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700 dark:text-gray-300">各群のサンプルサイズ:</span>
+                <span id="sample-size-per-group" class="text-3xl font-bold text-[#98D8C8]">64</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700 dark:text-gray-300">総サンプルサイズ:</span>
+                <span id="total-sample-size" class="text-3xl font-bold text-[#FF6F61]">128</span>
+              </div>
+            </div>
+
+            <!-- 解釈ガイド -->
+            <div class="mt-6 flex items-start gap-2">
+              <span class="text-xl">💡</span>
+              <p id="interpretation" class="text-sm text-gray-700 dark:text-gray-300">
+                効果量 0.50、有意水準 0.05、検出力 0.80 の条件下で、各群64名（合計128名）のサンプルが必要です。
+              </p>
+            </div>
+          </div>
+
+          <!-- 効果量の目安 -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">📊 効果量の目安</h3>
+            <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+              <li>• <strong>小 (d = 0.2)</strong>: 微小な差（検出が難しい）</li>
+              <li>• <strong>中 (d = 0.5)</strong>: 中程度の差（実用的な大きさ）</li>
+              <li>• <strong>大 (d = 0.8)</strong>: 大きな差（明確に識別可能）</li>
+              <li class="text-xs mt-2">参考: Cohen, J. (1988)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 右側: グラフ -->
+        <div class="space-y-6">
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold mb-4">検出力曲線</h3>
+            <div style="height: 300px;">
+              <canvas id="power-curve-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- 計算式 -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <button
+              id="formula-toggle"
+              class="w-full flex items-center justify-between text-lg font-semibold mb-4 hover:text-[#98D8C8] transition-colors"
+            >
+              <span>計算式を見る</span>
+              <svg id="formula-icon" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div id="formula-content" class="hidden">
+              <div class="prose dark:prose-invert max-w-none">
+                <p class="text-sm mb-3">独立2群t検定のサンプルサイズ計算式:</p>
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded text-center my-4">
+                  <div class="katex-display text-lg"></div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  ここで、Z<sub>α</sub>は有意水準αに対応する標準正規分布の分位点、
+                  Z<sub>β</sub>は検出力(1-β)に対応する分位点、dは効果量（Cohen's d）です。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 実例セクション -->
+          <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <h3 class="font-semibold text-green-900 dark:text-green-300 mb-2">🎓 実例</h3>
+            <p class="text-sm text-green-800 dark:text-green-300 mb-2">
+              <strong>新しい教育プログラムの効果を検証したい</strong>
+            </p>
+            <ul class="text-sm text-green-800 dark:text-green-300 space-y-1">
+              <li>• 期待される効果量: 0.5（中程度の効果）</li>
+              <li>• 有意水準: 0.05</li>
+              <li>• 検出力: 0.80</li>
+              <li class="font-semibold mt-2">→ 各群64名（合計128名）が必要</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <section class="mt-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-6">💬 FAQ</h2>
+        <div class="space-y-4">
+          <details class="group">
+            <summary class="cursor-pointer font-semibold text-lg hover:text-[#98D8C8] transition-colors list-none flex items-center justify-between">
+              <span>効果量とは？</span>
+              <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </summary>
+            <p class="mt-2 text-gray-600 dark:text-gray-400 pl-4">
+              効果量は、2つのグループ間の差の大きさを標準化した指標です。Cohen's dは平均値の差を標準偏差で割った値で、
+              統計的有意性とは独立して、実質的な差の大きさを表します。
+            </p>
+          </details>
+
+          <details class="group">
+            <summary class="cursor-pointer font-semibold text-lg hover:text-[#98D8C8] transition-colors list-none flex items-center justify-between">
+              <span>検出力とは？</span>
+              <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </summary>
+            <p class="mt-2 text-gray-600 dark:text-gray-400 pl-4">
+              検出力（1-β）は、実際に効果が存在するときに、統計的検定でそれを正しく検出できる確率です。
+              一般的に0.80以上が推奨されます。これは、真の効果を見逃すリスク（第2種の過誤）を20%以下に抑えることを意味します。
+            </p>
+          </details>
+
+          <details class="group">
+            <summary class="cursor-pointer font-semibold text-lg hover:text-[#98D8C8] transition-colors list-none flex items-center justify-between">
+              <span>なぜサンプルサイズが重要？</span>
+              <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </summary>
+            <p class="mt-2 text-gray-600 dark:text-gray-400 pl-4">
+              適切なサンプルサイズは、研究の信頼性と効率性の両方に影響します。サンプルが少なすぎると重要な効果を検出できず、
+              多すぎると時間とコストがかかりすぎるおそれがあります。事前にサンプルサイズを計算することで、適切な研究計画を立てることができます。
+            </p>
+          </details>
+        </div>
+      </section>
+    </div>
+
+    <!-- 他のタブパネル（Coming Soon表示） -->
+    <div id="panel-paired" class="tab-panel hidden" role="tabpanel">
+      <div class="text-center py-12">
+        <p class="text-xl text-gray-500 dark:text-gray-400">対応のあるt検定のサンプルサイズ計算機能は準備中です。</p>
+      </div>
+    </div>
+
+    <div id="panel-proportion" class="tab-panel hidden" role="tabpanel">
+      <div class="text-center py-12">
+        <p class="text-xl text-gray-500 dark:text-gray-400">比率の検定のサンプルサイズ計算機能は準備中です。</p>
+      </div>
+    </div>
+
+    <div id="panel-correlation" class="tab-panel hidden" role="tabpanel">
+      <div class="text-center py-12">
+        <p class="text-xl text-gray-500 dark:text-gray-400">相関係数の検定のサンプルサイズ計算機能は準備中です。</p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  // ============================================
+  // 型定義
+  // ============================================
+
+  interface SampleSizeParams {
+    effectSize: number;
+    alpha: number;
+    power: number;
+    testType: 'two-sided' | 'one-sided';
+  }
+
+  interface SampleSizeResult {
+    sampleSizePerGroup: number;
+    totalSampleSize: number;
+    powerCurve: { n: number; power: number }[];
+  }
+
+  declare global {
+    interface Window {
+      katex: any;
+    }
+  }
+
+  // ============================================
+  // 統計計算関数
+  // ============================================
+
+  /**
+   * 誤差関数（erf）
+   */
+  function erf(x: number): number {
+    const sign = x >= 0 ? 1 : -1;
+    const absX = Math.abs(x);
+
+    const a1 = 0.254829592;
+    const a2 = -0.284496736;
+    const a3 = 1.421413741;
+    const a4 = -1.453152027;
+    const a5 = 1.061405429;
+    const p = 0.3275911;
+
+    const t = 1 / (1 + p * absX);
+    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+
+    return sign * y;
+  }
+
+  /**
+   * 標準正規分布の累積分布関数（CDF）
+   */
+  function normalCDF(z: number): number {
+    return 0.5 * (1 + erf(z / Math.sqrt(2)));
+  }
+
+  /**
+   * 標準正規分布の逆累積分布関数（inverse CDF）
+   */
+  function normalInvCDF(p: number): number {
+    if (p <= 0 || p >= 1) {
+      throw new Error('確率は0と1の間である必要があります');
+    }
+
+    // より精度の高い初期値推定（Acklam's approximation）
+    let z: number;
+    const a = [
+      -3.969683028665376e+01,
+      2.209460984245205e+02,
+      -2.759285104469687e+02,
+      1.383577518672690e+02,
+      -3.066479806614716e+01,
+      2.506628277459239e+00
+    ];
+    const b = [
+      -5.447609879822406e+01,
+      1.615858368580409e+02,
+      -1.556989798598866e+02,
+      6.680131188771972e+01,
+      -1.328068155288572e+01
+    ];
+    const c = [
+      -7.784894002430293e-03,
+      -3.223964580411365e-01,
+      -2.400758277161838e+00,
+      -2.549732539343734e+00,
+      4.374664141464968e+00,
+      2.938163982698783e+00
+    ];
+    const d = [
+      7.784695709041462e-03,
+      3.224671290700398e-01,
+      2.445134137142996e+00,
+      3.754408661907416e+00
+    ];
+
+    const pLow = 0.02425;
+    const pHigh = 1 - pLow;
+
+    if (p < pLow) {
+      const q = Math.sqrt(-2 * Math.log(p));
+      z = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+        ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    } else if (p <= pHigh) {
+      const q = p - 0.5;
+      const r = q * q;
+      z = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+        (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+    } else {
+      const q = Math.sqrt(-2 * Math.log(1 - p));
+      z = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+        ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+
+    // Newton-Raphson法で精度を向上
+    for (let i = 0; i < 3; i++) {
+      const currentP = normalCDF(z);
+      const pdf = Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI);
+      const error = currentP - p;
+
+      if (Math.abs(error) < 1e-12) break;
+
+      z = z - error / pdf;
+    }
+
+    return z;
+  }
+
+  /**
+   * サンプルサイズを計算
+   */
+  function calculateSampleSize(params: SampleSizeParams): SampleSizeResult {
+    const { effectSize, alpha, power, testType } = params;
+
+    // 臨界値の計算
+    const zAlpha = testType === 'two-sided'
+      ? normalInvCDF(1 - alpha / 2)
+      : normalInvCDF(1 - alpha);
+
+    const zBeta = normalInvCDF(power);
+
+    // サンプルサイズの計算
+    const n = 2 * Math.pow((zAlpha + zBeta) / effectSize, 2);
+    const sampleSizePerGroup = Math.ceil(n);
+    const totalSampleSize = sampleSizePerGroup * 2;
+
+    // 検出力曲線のデータ生成
+    const powerCurve: { n: number; power: number }[] = [];
+    for (let sampleN = 5; sampleN <= Math.min(500, sampleSizePerGroup * 3); sampleN += 5) {
+      const z = zAlpha - effectSize * Math.sqrt(sampleN / 2);
+      const calculatedPower = 1 - normalCDF(z);
+      powerCurve.push({ n: sampleN, power: calculatedPower });
+    }
+
+    return {
+      sampleSizePerGroup,
+      totalSampleSize,
+      powerCurve
+    };
+  }
+
+  // ============================================
+  // UI初期化
+  // ============================================
+
+  let updateTimeout: number;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      // KaTeX読み込み
+      const katexPromise = (async () => {
+        const katexScript = document.createElement('script');
+        katexScript.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
+        katexScript.integrity = 'sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8';
+        katexScript.crossOrigin = 'anonymous';
+
+        await new Promise<void>((resolve, reject) => {
+          katexScript.onload = () => resolve();
+          katexScript.onerror = reject;
+          document.head.appendChild(katexScript);
+        });
+
+        if (window.katex) {
+          const formulaDisplay = document.querySelector('.katex-display');
+          if (formulaDisplay) {
+            window.katex.render(
+              'n = 2 \\times \\left(\\frac{Z_{\\alpha/2} + Z_{\\beta}}{d}\\right)^2',
+              formulaDisplay,
+              { displayMode: true, throwOnError: false }
+            );
+          }
+        }
+      })();
+
+      // Chart.js読み込み
+      const { Chart, registerables } = await import('chart.js');
+      Chart.register(...registerables);
+
+      // DOM要素取得
+      const effectSizeInput = document.getElementById('effect-size') as HTMLInputElement;
+      const powerInput = document.getElementById('power') as HTMLInputElement;
+      const effectSizeValue = document.getElementById('effect-size-value') as HTMLElement;
+      const powerValue = document.getElementById('power-value') as HTMLElement;
+      const sampleSizePerGroup = document.getElementById('sample-size-per-group') as HTMLElement;
+      const totalSampleSize = document.getElementById('total-sample-size') as HTMLElement;
+      const interpretation = document.getElementById('interpretation') as HTMLElement;
+
+      // タブ切り替え
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabPanels = document.querySelectorAll('.tab-panel');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetPanel = button.getAttribute('aria-controls');
+
+          tabButtons.forEach(btn => {
+            btn.classList.remove('active', 'border-[#98D8C8]', 'text-[#98D8C8]');
+            btn.classList.add('border-transparent', 'text-gray-500');
+            btn.setAttribute('aria-selected', 'false');
+          });
+
+          button.classList.add('active', 'border-[#98D8C8]', 'text-[#98D8C8]');
+          button.classList.remove('border-transparent', 'text-gray-500');
+          button.setAttribute('aria-selected', 'true');
+
+          tabPanels.forEach(panel => panel.classList.add('hidden'));
+          document.getElementById(targetPanel!)?.classList.remove('hidden');
+        });
+      });
+
+      // アルファ値ボタン
+      let currentAlpha = 0.05;
+      const alphaButtons = document.querySelectorAll('.alpha-button');
+
+      alphaButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          alphaButtons.forEach(btn => {
+            btn.classList.remove('border-[#98D8C8]', 'bg-[#98D8C8]/10', 'text-[#98D8C8]', 'font-semibold');
+            btn.classList.add('border-gray-300', 'dark:border-gray-600', 'text-gray-700', 'dark:text-gray-300');
+          });
+
+          button.classList.add('border-[#98D8C8]', 'bg-[#98D8C8]/10', 'text-[#98D8C8]', 'font-semibold');
+          button.classList.remove('border-gray-300', 'dark:border-gray-600', 'text-gray-700', 'dark:text-gray-300');
+
+          currentAlpha = parseFloat(button.getAttribute('data-value')!);
+          debouncedUpdate();
+        });
+      });
+
+      // 計算式トグル
+      const formulaToggle = document.getElementById('formula-toggle');
+      const formulaContent = document.getElementById('formula-content');
+      const formulaIcon = document.getElementById('formula-icon');
+
+      formulaToggle?.addEventListener('click', () => {
+        formulaContent?.classList.toggle('hidden');
+        formulaIcon?.classList.toggle('rotate-180');
+      });
+
+      // Chart初期化
+      const chartCanvas = document.getElementById('power-curve-chart') as HTMLCanvasElement;
+      const powerChart = new Chart(chartCanvas, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: '検出力曲線',
+              data: [],
+              borderColor: '#98D8C8',
+              backgroundColor: 'rgba(152, 216, 200, 0.1)',
+              tension: 0.4,
+              fill: true,
+              pointRadius: 0,
+              borderWidth: 2
+            },
+            {
+              label: '現在の設定',
+              data: [],
+              borderColor: '#FF6F61',
+              backgroundColor: '#FF6F61',
+              pointRadius: 8,
+              pointHoverRadius: 10,
+              showLine: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: 0
+          },
+          scales: {
+            x: {
+              type: 'linear',
+              title: {
+                display: true,
+                text: 'サンプルサイズ（各群）',
+                color: '#9CA3AF'
+              },
+              grid: { color: 'rgba(156, 163, 175, 0.2)' },
+              ticks: { color: '#9CA3AF' }
+            },
+            y: {
+              type: 'linear',
+              title: {
+                display: true,
+                text: '検出力 (1-β)',
+                color: '#9CA3AF'
+              },
+              min: 0,
+              max: 1,
+              grid: { color: 'rgba(156, 163, 175, 0.2)' },
+              ticks: { color: '#9CA3AF' }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top' as const
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  if (context.datasetIndex === 0) {
+                    return `検出力: ${context.parsed.y.toFixed(3)}`;
+                  }
+                  return `現在の設定 (n=${context.parsed.x}, 検出力=${context.parsed.y.toFixed(3)})`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // 更新関数
+      function updateCalculation() {
+        const effectSize = parseFloat(effectSizeInput.value);
+        const power = parseFloat(powerInput.value);
+        const testTypeRadio = document.querySelector('input[name="test-type"]:checked') as HTMLInputElement;
+        const testType = testTypeRadio.value as 'two-sided' | 'one-sided';
+
+        const result = calculateSampleSize({
+          effectSize,
+          alpha: currentAlpha,
+          power,
+          testType
+        });
+
+        // 表示更新
+        effectSizeValue.textContent = effectSize.toFixed(2);
+        powerValue.textContent = power.toFixed(2);
+        sampleSizePerGroup.textContent = result.sampleSizePerGroup.toString();
+        totalSampleSize.textContent = result.totalSampleSize.toString();
+
+        interpretation.textContent =
+          `効果量 ${effectSize.toFixed(2)}、有意水準 ${currentAlpha.toFixed(2)}、検出力 ${power.toFixed(2)} の条件下で、` +
+          `各群${result.sampleSizePerGroup}名（合計${result.totalSampleSize}名）のサンプルが必要です。`;
+
+        // グラフ更新
+        powerChart.data.datasets[0].data = result.powerCurve.map(d => ({ x: d.n, y: d.power }));
+        powerChart.data.datasets[1].data = [{ x: result.sampleSizePerGroup, y: power }];
+        powerChart.update('none');
+      }
+
+      // デバウンス処理（300ms）
+      function debouncedUpdate() {
+        clearTimeout(updateTimeout);
+        updateTimeout = setTimeout(updateCalculation, 300);
+      }
+
+      // イベントリスナー
+      effectSizeInput.addEventListener('input', debouncedUpdate);
+      powerInput.addEventListener('input', debouncedUpdate);
+      document.querySelectorAll('input[name="test-type"]').forEach(radio => {
+        radio.addEventListener('change', debouncedUpdate);
+      });
+
+      // 初期表示
+      updateCalculation();
+
+      // KaTeX読み込み完了待機
+      katexPromise.catch(e => console.error('KaTeX loading error:', e));
+
+    } catch (error) {
+      console.error('Initialization error:', error);
+    }
+  });
+</script>
+
+<style>
+  /* スライダーのカスタムスタイル */
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #98D8C8;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #98D8C8;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ツールチップスタイル */
+  .tooltip-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: help;
+    color: #98D8C8;
+  }
+
+  .tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    z-index: 50;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 200px;
+    max-width: 300px;
+    padding: 8px 12px;
+    background-color: #1f2937;
+    color: white;
+    text-align: left;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 1.4;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+  }
+
+  .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1f2937;
+  }
+
+  .tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* detailsのアニメーション */
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details[open] > summary ~ * {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
