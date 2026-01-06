@@ -17,7 +17,12 @@ const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="shortcut icon" href={`${base}favicon.svg`} />
+    <link rel="apple-touch-icon" href={`${base}favicon.svg`} />
+    
     <meta name="generator" content={Astro.generator} />
     <title>{title} | StatLens</title>
 
