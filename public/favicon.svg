@@ -4,8 +4,21 @@
 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="640.000000pt" height="637.000000pt" viewBox="0 0 640.000000 637.000000"
  preserveAspectRatio="xMidYMid meet">
+<style>
+  /* ライトモードはデフォルトで黒 */
+  .icon-fill {
+    fill: #000000;
+  }
+  
+  /* ダークモードでは白に切り替え */
+  @media (prefers-color-scheme: dark) {
+    .icon-fill {
+      fill: #ffffff;
+    }
+  }
+</style>
 <g transform="translate(0.000000,637.000000) scale(0.100000,-0.100000)"
-fill="#1e3a8a" stroke="none">
+class="icon-fill" stroke="none">
 <path d="M2950 6339 c-924 -55 -1893 -594 -2367 -1315 -118 -180 -201 -363
 -249 -549 -27 -102 -29 -123 -28 -290 1 -151 4 -193 22 -258 53 -192 153 -357
 310 -509 124 -120 243 -199 520 -342 260 -135 387 -216 500 -315 242 -213 315
